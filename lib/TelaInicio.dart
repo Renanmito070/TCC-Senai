@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutternexus/PaginaMaps.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -209,11 +210,9 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                   Padding(
                       padding: EdgeInsets.only(top: 230),
                     child: Text(
-                      "Clique na pizza para confirmar seu pedido!",
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                        fontWeight: FontWeight.bold
+                      'Clique na pizza para confirma seu pedido!',
+                      style: GoogleFonts.lato(
+                        textStyle: TextStyle(color: Colors.blue, letterSpacing: .5),
                       ),
                     ),
                   ),
