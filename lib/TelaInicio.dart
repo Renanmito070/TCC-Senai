@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutternexus/Duvidas.dart';
+import 'package:flutternexus/MedidaProtetiva.dart';
 import 'package:flutternexus/PaginaMaps.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -171,7 +173,7 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("images/imagemFundo2.png"),
+              image: AssetImage("images/fundFoto.png"),
               fit: BoxFit.cover,
             ),
           ),
@@ -182,7 +184,7 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: EdgeInsets.fromLTRB(40, 80, 60, 0),
+                    padding: EdgeInsets.fromLTRB(40, 112, 60, 0),
                     child: Row(
                       children: [
                         Image.asset(
@@ -193,12 +195,37 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                         ),
                         Text(
                           "Olá, seja bem-vindo",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white
+                          style: GoogleFonts.lato(
+                            textStyle: TextStyle(color: Colors.white, letterSpacing: .5),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ],
+              ),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 115),
+                      child: GestureDetector(
+                        onTap: _handleSubmit,
+                        child: RotationTransition(
+                          turns: _controller,
+                          child: Image.asset(
+                            "images/pizza.png",
+                            height: 310,
+                            width: 310,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -208,33 +235,60 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(
-                      padding: EdgeInsets.only(top: 230),
+                    padding: EdgeInsets.only(top: 25),
                     child: Text(
                       'Clique na pizza para confirma seu pedido!',
                       style: GoogleFonts.lato(
-                        textStyle: TextStyle(color: Colors.blue, letterSpacing: .5),
+                        textStyle: TextStyle(color: Colors.white, letterSpacing: .5),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
                 ],
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Center(
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: GestureDetector(
-                        onTap: _handleSubmit,
-                        child: RotationTransition(
-                          turns: _controller,
-                          child: Image.asset(
-                            "images/pizza.png",
-                            height: 300,
-                            width: 300,
-                            fit: BoxFit.cover,
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(45, 100, 0, 38),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Medidaprotetiva(),
                           ),
+                        );
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.asset(
+                          "images/bebida.png",
+                          height: 180,
+                          width: 180,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(20, 100, 0, 40),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Duvidas(),
+                          ),
+                        );
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.asset(
+                          "images/comida.png",
+                          height: 180,
+                          width: 180,
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
@@ -242,7 +296,7 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                 ],
               ),
               Padding(
-                  padding: EdgeInsets.only(top: 288.7),
+                padding: EdgeInsets.only(top: 41.8),
                 child: Container(
                   color: Colors.black,
                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -250,19 +304,23 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.info_sharp, color: Colors.white),
-                        onPressed: () {
-                          // Ação para o botão de home
-                        },
-                      ),
-                      IconButton(
                         icon: Icon(Icons.map, color: Colors.white),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  PaginaMaps(),
+                              builder: (context) => PaginaMaps(),
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.home, color: Colors.white),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TelaInicial("",""),
                             ),
                           );
                         },

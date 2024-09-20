@@ -71,15 +71,13 @@ flutter:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   assets:
-    - images/bebidas.png
-    - images/esfiha.png
+
     - images/perfill.png
     - images/pizza.png
-    - images/fundos.png
-    - images/imagemFundo1.png
-    - images/imagemFundo2.png
-    - images/imagemFundo3.png
-    - images/imagemFundo4.png
+    - images/fundo.png
+    - images/fundFoto.png
+    - images/bebida.png
+    - images/comida.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

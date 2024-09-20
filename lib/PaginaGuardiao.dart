@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutternexus/TelaInicio.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -56,7 +57,7 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
         child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("images/imagemFundo1.png"),
+              image: AssetImage("images/fundo.png"),
               fit: BoxFit.cover,
             ),
           ),
@@ -82,14 +83,15 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
                           Padding(
                             padding: EdgeInsets.all(10),
                             child: Text(
-                              'Cadastre seu entregador',
-                              style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white
+                              "CADASTRE SEU ENTREGADOR:",
+                              style: GoogleFonts.lato(
+                                textStyle: TextStyle(color: Colors.white, letterSpacing: .5),
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
+                          Padding(padding: EdgeInsets.only(bottom: 15, top: 20)),
                           SizedBox(
                             width: 350, // Ajuste a largura conforme necessário
                             child: TextFormField(
@@ -128,7 +130,9 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
                               controller: telefone,
                               decoration: InputDecoration(
                                 labelText: 'Número(Opicional)',
-                                labelStyle: TextStyle(color: Colors.white),
+                                labelStyle: TextStyle(
+                                    color: Colors.white
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
