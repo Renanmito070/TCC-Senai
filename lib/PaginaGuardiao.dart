@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutternexus/TelaInicio.dart';
+import 'package:flutternexus/PaginaInicio.dart';
+import 'package:flutternexus/main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PaginaGuardiao extends StatefulWidget {
   const PaginaGuardiao({Key? key}) : super(key: key);
@@ -12,9 +16,49 @@ class PaginaGuardiao extends StatefulWidget {
 }
 
 class _PaginaGuardiaoState extends State<PaginaGuardiao> {
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  Map<String, dynamic>? guardiao; // Para armazenar os dados do usuário específico
   final _formKey = GlobalKey<FormState>(); // GlobalKey para o Form
-  TextEditingController email = TextEditingController();
-  TextEditingController telefone = TextEditingController();
+  final TextEditingController email = TextEditingController();
+  final TextEditingController telefone = TextEditingController();
+
+  Future<void> adicionarGuardiao() async {
+    try {
+      DocumentReference docRef = await firestore.collection('guardiões').add({
+        'email': email.text,
+        'telefone': int.parse(telefone.text),
+      });
+
+      // Armazena o ID do usuário adicionado
+      guardiaoId = docRef.id;
+
+      // Salva o ID no arquivo de texto
+      await salvarIdEmArquivo(guardiaoId!);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Usuário adicionado com sucesso! ID: $guardiaoId')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao adicionar usuário: $e')),
+      );
+    }
+  }
+  Future<void> salvarIdEmArquivo(String guardiaoId) async {
+    try {
+      // Obtém o diretório onde o arquivo deve ser salvo
+      final directory = await getApplicationDocumentsDirectory();
+      final path = '${directory.path}/guardiao.txt';
+      final file = File(path);
+
+      // Escreve o ID no arquivo (adiciona ao invés de sobrescrever)
+      await file.writeAsString('$guardiaoId\n', mode: FileMode.append);
+
+      print('ID do Guardião salvo no arquivo: $path');
+    } catch (e) {
+      print('Erro ao salvar ID no arquivo: $e');
+    }
+  }
 
   Future<void> _sendEmail(String recipient) async {
     const String serviceId = 'service_q3u8fbq';
@@ -49,12 +93,18 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
       print('Resposta: ${response.body}');
     }
   }
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
             image: DecorationImage(
               image: AssetImage("images/fundo.png"),
@@ -71,7 +121,7 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
                   SizedBox(height: 50),
                   // Container para o fundo preto dos campos e botões
                   Padding(
-                    padding: EdgeInsets.only(bottom: 336, top: 335),
+                    padding: EdgeInsets.only(bottom: 0),
                     child: Container(
                       padding: EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -150,23 +200,33 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
                               onPressed: () {
                                 if (_formKey.currentState?.validate() ?? false) {
                                   _sendEmail(email.text);
+                                  adicionarGuardiao();
                                   print('Validação bem-sucedida');
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          TelaInicial(email.text, telefone.text),
+                                          PaginaInicio(),
                                     ),
                                   );
                                 } else {
                                   print('Falha na validação');
                                 }
                               },
-                              child: Text(
-                                'Cadastrar',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.verified_user,
+                                    color: Colors.white,
+                                  ),
+                                  Text(
+                                    'Cadastrar',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
@@ -175,6 +235,46 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
                                 ),
                                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                                 textStyle: TextStyle(fontSize: 18),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                              padding: EdgeInsets.only(top: 10),
+                            child: SizedBox(
+                              width: 260, // Ajuste a largura conforme necessário
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            PaginaInicio()
+                                    ),
+                                  );
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                        Icons.skip_next,
+                                      color: Colors.white,
+                                    ),
+                                    Text(
+                                      'Pular',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black12,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                                  textStyle: TextStyle(fontSize: 18),
+                                ),
                               ),
                             ),
                           ),

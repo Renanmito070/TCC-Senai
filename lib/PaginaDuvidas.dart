@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutternexus/TelaInicio.dart';
+import 'package:flutternexus/PaginaInicio.dart';
 
-class Duvidas extends StatefulWidget {
-  const Duvidas({super.key});
+class PaginaDuvidas extends StatefulWidget {
+  const PaginaDuvidas({super.key});
 
   @override
-  State<Duvidas> createState() => _DuvidasState();
+  State<PaginaDuvidas> createState() => _PaginaDuvidasState();
 }
 
-class _DuvidasState extends State<Duvidas> {
+class _PaginaDuvidasState extends State<PaginaDuvidas> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,7 +19,7 @@ class _DuvidasState extends State<Duvidas> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TelaInicial("", ""),
+                builder: (context) => PaginaInicio(),
               ),
             );
           },

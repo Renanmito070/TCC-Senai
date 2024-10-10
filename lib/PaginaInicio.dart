@@ -1,28 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:flutternexus/Duvidas.dart';
-import 'package:flutternexus/MedidaProtetiva.dart';
+import 'package:flutternexus/PaginaCadastro.dart';
+import 'package:flutternexus/PaginaDuvidas.dart';
+import 'package:flutternexus/PaginaMedidaProtetiva.dart';
+import 'package:flutternexus/PaginaGuardiao.dart';
 import 'package:flutternexus/PaginaMaps.dart';
+import 'package:flutternexus/main.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class TelaInicial extends StatefulWidget {
-  String email;
-  String telefone;
-
-  TelaInicial(this.email, this.telefone);
+class PaginaInicio extends StatefulWidget {
+  const PaginaInicio({Key? key}) : super(key: key);
 
   @override
-  State<TelaInicial> createState() => _TelaInicialState();
+  State<PaginaInicio> createState() => _PaginaInicioState();
 }
 
-class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStateMixin {
+class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderStateMixin {
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
   String _address = '';
   late AnimationController _controller;
   final String botToken = '7540693977:AAG3Tf0mjzMIHMpUtaFjK3l3TCM3d4knuOI';
   final List<String> chatIds = ['6727844526', '5475743506', "6022440283"];
+  String guardiaoEmail = "";
+
+  Future<void> obterUsuarioEspecifico(String id) async {
+    try {
+      DocumentSnapshot snapshot = await firestore.collection('guardiões').doc(id).get();
+      if (snapshot.exists) {
+        final dadosUsuario = snapshot.data() as Map<String, dynamic>;
+        setState(() {
+          guardiaoEmail = dadosUsuario['email'];
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Usuário não encontrado')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao obter dados: $e')),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -124,7 +147,6 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
 
   Future<void> _handleSubmit() async {
     print('Validação bem-sucedida');
-    final emaill = widget.email;
 
     try {
       if (_address.isEmpty) {
@@ -133,9 +155,9 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
       }
       if (_address.isNotEmpty) {
         final String url = 'https://api.telegram.org/bot$botToken/sendMessage';
-        final String message = 'Peço que você entre em contato com [Nome da pessoa em perigo] o mais rápido possível para verificar se ela está bem. Por favor, se dirija ao local onde ela se encontra ou entre em contato com as autoridades locais para garantir que ela receba a ajuda necessária. $_address'; // Mensagem predefinida
+        final String message = 'Peço que você entre em contato com [Nome da pessoa em perigo] o mais rápido possível para verificar se ela está bem. Por favor, se dirija ao local onde ela se encontra ou entre em contato com as autoridades locais para garantir que ela receba a ajuda necessária. $_address';
 
-        await _sendEmail(emaill);
+        await _sendEmail(guardiaoEmail);
 
         for (String chatId in chatIds) {
           final response = await http.post(
@@ -163,6 +185,7 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +238,18 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                     child: Padding(
                       padding: EdgeInsets.only(top: 115),
                       child: GestureDetector(
-                        onTap: _handleSubmit,
+                        onTap: () {
+                          if(guardiaoId == ""){
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PaginaGuardiao(),
+                              ),
+                            );
+                          }else{
+                            obterUsuarioEspecifico(guardiaoId!);                            _handleSubmit();
+                          }
+                        },
                         child: RotationTransition(
                           turns: _controller,
                           child: Image.asset(
@@ -256,7 +290,7 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Medidaprotetiva(),
+                            builder: (context) => PaginaMedidaprotetiva(),
                           ),
                         );
                       },
@@ -278,7 +312,7 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Duvidas(),
+                            builder: (context) => PaginaDuvidas(),
                           ),
                         );
                       },
@@ -320,7 +354,7 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => TelaInicial("",""),
+                              builder: (context) => PaginaInicio(),
                             ),
                           );
                         },
@@ -328,7 +362,12 @@ class _TelaInicialState extends State<TelaInicial> with SingleTickerProviderStat
                       IconButton(
                         icon: Icon(Icons.person, color: Colors.white),
                         onPressed: () {
-                          // Ação para o botão de perfil
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PaginaCadastro(),
+                            ),
+                          );
                         },
                       ),
                     ],

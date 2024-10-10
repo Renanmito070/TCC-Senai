@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "889270959575",
+    "project_id": "nexusspectrum-803af",
+    "storage_bucket": "nexusspectrum-803af.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889270959575:android:f9197881c285bdfe585f92",
+        "android_client_info": {
+          "package_name": "com.example.flutternexus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzvCMW3mFjAl3FQj2JtU9fLoScERlaf1c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

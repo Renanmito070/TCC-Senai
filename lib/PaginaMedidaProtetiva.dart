@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutternexus/TelaInicio.dart';
+import 'package:flutternexus/PaginaInicio.dart';
 
-class Medidaprotetiva extends StatefulWidget {
-  const Medidaprotetiva({super.key});
+class PaginaMedidaprotetiva extends StatefulWidget {
+  const PaginaMedidaprotetiva({super.key});
 
   @override
-  State<Medidaprotetiva> createState() => _MedidaprotetivaState();
+  State<PaginaMedidaprotetiva> createState() => _PaginaMedidaprotetivaState();
 }
 
-class _MedidaprotetivaState extends State<Medidaprotetiva> {
+class _PaginaMedidaprotetivaState extends State<PaginaMedidaprotetiva> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,7 +19,7 @@ class _MedidaprotetivaState extends State<Medidaprotetiva> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TelaInicial("", ""),
+                builder: (context) => PaginaInicio(),
               ),
             );
           },

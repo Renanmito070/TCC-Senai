@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutternexus/TelaInicio.dart';
+import 'package:flutternexus/PaginaInicio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
@@ -72,7 +72,7 @@ class _PaginaMapsState extends State<PaginaMaps> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TelaInicial("",""),
+                          builder: (context) => PaginaInicio(),
                         ),
                       );
                     },
