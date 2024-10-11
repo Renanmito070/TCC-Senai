@@ -19,13 +19,13 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   Map<String, dynamic>? guardiao; // Para armazenar os dados do usuário específico
   final _formKey = GlobalKey<FormState>(); // GlobalKey para o Form
-  final TextEditingController email = TextEditingController();
+  final TextEditingController emailGuardiao = TextEditingController();
   final TextEditingController telefone = TextEditingController();
 
   Future<void> adicionarGuardiao() async {
     try {
-      DocumentReference docRef = await firestore.collection('guardiões').add({
-        'email': email.text,
+      DocumentReference docRef = await firestore.collection('usuarios').doc(usuarioId).collection('guardioes').add({
+        'email': emailGuardiao.text,
         'telefone': int.parse(telefone.text),
       });
 
@@ -33,7 +33,7 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
       guardiaoId = docRef.id;
 
       // Salva o ID no arquivo de texto
-      await salvarIdEmArquivo(guardiaoId!);
+      await salvarIdEmArquivoGuardiao(guardiaoId!);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Usuário adicionado com sucesso! ID: $guardiaoId')),
@@ -44,7 +44,7 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
       );
     }
   }
-  Future<void> salvarIdEmArquivo(String guardiaoId) async {
+  Future<void> salvarIdEmArquivoGuardiao(String guardiaoId) async {
     try {
       // Obtém o diretório onde o arquivo deve ser salvo
       final directory = await getApplicationDocumentsDirectory();
@@ -146,7 +146,7 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
                             width: 350, // Ajuste a largura conforme necessário
                             child: TextFormField(
                               keyboardType: TextInputType.emailAddress,
-                              controller: email,
+                              controller: emailGuardiao,
                               decoration: InputDecoration(
                                 labelText: 'Email',
                                 labelStyle: TextStyle(color: Colors.white),
@@ -179,7 +179,7 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
                               keyboardType: TextInputType.phone,
                               controller: telefone,
                               decoration: InputDecoration(
-                                labelText: 'Número(Opicional)',
+                                labelText: 'Telefone',
                                 labelStyle: TextStyle(
                                     color: Colors.white
                                 ),
@@ -199,7 +199,7 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
                             child: ElevatedButton(
                               onPressed: () {
                                 if (_formKey.currentState?.validate() ?? false) {
-                                  _sendEmail(email.text);
+                                  _sendEmail(emailGuardiao.text);
                                   adicionarGuardiao();
                                   print('Validação bem-sucedida');
                                   Navigator.pushReplacement(
@@ -235,46 +235,6 @@ class _PaginaGuardiaoState extends State<PaginaGuardiao> {
                                 ),
                                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                                 textStyle: TextStyle(fontSize: 18),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                              padding: EdgeInsets.only(top: 10),
-                            child: SizedBox(
-                              width: 260, // Ajuste a largura conforme necessário
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            PaginaInicio()
-                                    ),
-                                  );
-                                },
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                        Icons.skip_next,
-                                      color: Colors.white,
-                                    ),
-                                    Text(
-                                      'Pular',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black12,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                                  textStyle: TextStyle(fontSize: 18),
-                                ),
                               ),
                             ),
                           ),

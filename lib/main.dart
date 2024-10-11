@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutternexus/PaginaCadastro.dart';
 import 'package:flutternexus/PaginaGuardiao.dart';
 import 'package:flutternexus/PaginaInicio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -7,7 +8,7 @@ import 'dart:io';
 
 String? guardiaoId; // Para armazenar o ID do Guardião adicionado
 String? usuarioId; // Para armazenar o ID do Usuario adicionado
-
+String? loginUsuario;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +17,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  Future<void> verificarUsuarioId() async {
+  Future<void> verificarGuardiaoId() async {
     try {
       // Obtém o diretório onde o arquivo está armazenado
       final directory = await getApplicationDocumentsDirectory();
@@ -32,8 +33,33 @@ class MyApp extends StatelessWidget {
         }
       }
     } catch (e) {
-      print('Erro ao ler o arquivo: $e');
+      print('Erro ao ler o arquivo guardião: $e');
     }
+  }
+
+  Future<void> verificarUsuarioId() async {
+    try {
+      // Obtém o diretório onde o arquivo está armazenado
+      final directory = await getApplicationDocumentsDirectory();
+      final path = '${directory.path}/loginUsuario.txt';
+      final file = File(path);
+
+      // Verifica se o arquivo existe
+      if (await file.exists()) {
+        // Lê o conteúdo do arquivo
+        final contents = await file.readAsString();
+        if (contents.isNotEmpty) {
+          loginUsuario = contents.split('\n').firstWhere((id) => id.isNotEmpty, orElse: () => "");
+        }
+      }
+    } catch (e) {
+      print('Erro ao ler o arquivo usuário: $e');
+    }
+  }
+
+  Future<void> verificarIds() async {
+    await verificarGuardiaoId();
+    await verificarUsuarioId();
   }
 
   @override
@@ -41,7 +67,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: FutureBuilder(
-        future: verificarUsuarioId(),
+        future: verificarIds(), // Aguarda a verificação de ambos os arquivos
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
@@ -50,10 +76,13 @@ class MyApp extends StatelessWidget {
               ),
             );
           } else {
-            if (guardiaoId != null) {
+            // Verifica se há um usuário logado ou um guardião
+            if (loginUsuario != null) {
+              return PaginaInicio();
+            } else if (guardiaoId != null) {
               return PaginaInicio();
             } else {
-              return PaginaGuardiao();
+              return PaginaCadastro(); // Caso nenhum login ou guardião seja encontrado
             }
           }
         },
@@ -61,4 +90,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
