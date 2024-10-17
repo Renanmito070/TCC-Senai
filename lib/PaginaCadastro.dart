@@ -28,17 +28,23 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
   final TextEditingController telefone = TextEditingController();
   final TextEditingController nomeUsuario = TextEditingController();
 
+
   Future<void> adicionarUsuarioEGuardiao() async {
     try {
       // Adicionar o usuário primeiro
       DocumentReference docRef = await firestore.collection('usuarios').add({
         'nome': nomeUsuario.text,
         'email': emailUsuario.text,
-        'senha': _senha.text,
+        'senha': _senha.text, // Certifique-se que a senha seja manipulada com segurança
       });
 
-      // Armazena o ID do usuário adicionado
-      usuarioId = docRef.id;
+      // Armazena o ID do usuário adicionado e chama setState para garantir que o estado seja atualizado
+      if (mounted) {
+        setState(() {
+          usuarioId = docRef.id;
+        });
+      }
+      print('ID do usuário adicionado ao firebase: $usuarioId');
 
       // Salva o ID do usuário no arquivo de texto
       await salvarIdEmArquivoUsuario(usuarioId!);
@@ -50,23 +56,37 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
           .collection('guardioes') // Adiciona à subcoleção "guardioes"
           .add({
         'email': emailGuardiao.text,
-        'telefone': int.parse(telefone.text),
+        'telefone': int.tryParse(telefone.text) ?? 0, // Certifique-se de que o telefone seja convertido corretamente
       });
 
-      // Armazena o ID do guardião adicionado
-      guardiaoId = guardiaoRef.id;
+      // Armazena o ID do guardião adicionado e atualiza o estado
+      setState(() {
+        guardiaoId = guardiaoRef.id;
+      });
+      print('ID do guardião adicionado: $guardiaoId');
 
-      // Salva o ID do guardião no arquivo de texto
+      // Salva o ID do guardião no arquivo de texto, se necessário
       await salvarIdEmArquivoGuardiao(guardiaoId!);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Usuário e guardião adicionados com sucesso!')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Usuário e guardião adicionados com sucesso!')),
+        );
+      }
 
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao adicionar usuário e guardião: $e')),
+      // Navega para a próxima página somente após concluir as operações
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => PaginaInicio()),
       );
+    } catch (e) {
+      // Tratamento de erro ao adicionar usuário e guardião
+      print('Erro ao adicionar usuário e guardião: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao adicionar usuário e guardião: $e')),
+        );
+      }
     }
   }
 
@@ -270,7 +290,7 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
                                 keyboardType: TextInputType.emailAddress,
                                 controller: emailGuardiao,
                                 decoration: InputDecoration(
-                                  labelText: 'Email(Guardião)',
+                                  labelText: 'Email',
                                   labelStyle: TextStyle(color: Colors.white),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -301,7 +321,7 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
                                 keyboardType: TextInputType.phone,
                                 controller: telefone,
                                 decoration: InputDecoration(
-                                  labelText: 'Telefone(Guardião)',
+                                  labelText: 'Telefone',
                                   labelStyle: TextStyle(
                                       color: Colors.white
                                   ),
@@ -323,15 +343,7 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
                                   if (_formKey.currentState?.validate() ?? false) {
                                     print('Validação bem-sucedida');
                                     adicionarUsuarioEGuardiao();
-                                    print(guardiaoId);
                                     _sendEmail(emailGuardiao.text);
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            PaginaInicio(),
-                                      ),
-                                    );
                                   } else {
                                     print('Falha na validação');
                                   }

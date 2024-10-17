@@ -80,6 +80,28 @@ flutter:
     - images/fundFoto.png
     - images/bebida.png
     - images/comida.png
+    - images/default_profile.png
+    - images/bacon.jpg
+    - images/banana.jpg
+    - images/calabresa.jpg
+    - images/frangoCatupiry.jpg
+    - images/morangoNutella.jpg
+    - images/prestigio.jpg
+    - images/presuntoQueijo.jpg
+    - images/QuatroQueijos.jpg
+    - images/coca.jpg
+    - images/fantaLaranja.jpg
+    - images/fantaUva.jpg
+    - images/guarana.jpg
+    - images/Itubaina.jpg
+    - images/laranja.jpg
+    - images/maracuja.jpg
+    - images/pepsi.jpg
+    - images/pepsiBlack.jpg
+    - images/sprite.jpg
+    - images/uva.jpg
+    - images/BannerBebidas.jpg
+    - images/Esfihas.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

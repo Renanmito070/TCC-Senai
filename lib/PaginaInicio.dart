@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutternexus/PaginaBebidas.dart';
 import 'package:flutternexus/PaginaCadastro.dart';
 import 'package:flutternexus/PaginaDuvidas.dart';
+import 'package:flutternexus/PaginaEsfihas.dart';
 import 'package:flutternexus/PaginaMedidaProtetiva.dart';
 import 'package:flutternexus/PaginaGuardiao.dart';
 import 'package:flutternexus/PaginaMaps.dart';
@@ -289,8 +291,7 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
+      body: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
@@ -306,7 +307,7 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: EdgeInsets.fromLTRB(40, 112, 60, 0),
+                    padding: EdgeInsets.fromLTRB(40, 65.5, 60, 0),
                     child: Row(
                       children: [
                         Image.asset(
@@ -383,16 +384,17 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(45, 100, 0, 38),
-                    child: GestureDetector(
+              Padding(
+                  padding: EdgeInsets.only(top: 40),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PaginaMedidaprotetiva(),
+                            builder: (context) => PaginaBebidas(),
                           ),
                         );
                       },
@@ -406,15 +408,12 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
                         ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(20, 100, 0, 40),
-                    child: GestureDetector(
+                    GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PaginaDuvidas(),
+                            builder: (context) => PaginaEsfihas(),
                           ),
                         );
                       },
@@ -428,56 +427,52 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 41.8),
-                child: Container(
-                  color: Colors.black,
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.map, color: Colors.white),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PaginaMaps(),
-                            ),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.home, color: Colors.white),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PaginaInicio(),
-                            ),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.person, color: Colors.white),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PaginaUsuario(),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ],
           ),
+        ),
+      bottomNavigationBar: BottomAppBar(
+        height: 60,
+        color: Colors.black,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: Icon(Icons.map, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PaginaMaps(),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.home, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PaginaInicio(),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.person, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PaginaUsuario(),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
