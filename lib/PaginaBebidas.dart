@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutternexus/PaginaInicio.dart';
 import 'package:flutternexus/PaginaMedidaProtetiva.dart';
 
 class PaginaBebidas extends StatefulWidget {
@@ -390,6 +391,46 @@ class _PaginaBebidasState extends State<PaginaBebidas> {
                 ],
               ),
               Padding(padding: EdgeInsets.only(top: 25)),
+              Column(
+                children: [
+                  Padding(padding:
+                  EdgeInsets.only(right: 100, left: 100, bottom: 20),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PaginaInicio(),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Confirmar ',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                        Icon(
+                          Icons.check,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrangeAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                      textStyle: TextStyle(fontSize: 18),
+                    ),
+                  ),)
+                ],
+              ),
             ],
           ),
         ),

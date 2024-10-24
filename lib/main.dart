@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
     try {
       // Obtém o diretório onde o arquivo está armazenado
       final directory = await getApplicationDocumentsDirectory();
-      final path = '${directory.path}/loginUsuario.txt';
+      final path = '${directory.path}/usuario.txt';
       final file = File(path);
 
       // Verifica se o arquivo existe
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
         // Lê o conteúdo do arquivo
         final contents = await file.readAsString();
         if (contents.isNotEmpty) {
-          loginUsuario = contents.split('\n').firstWhere((id) => id.isNotEmpty, orElse: () => "");
+          guardiaoId = contents.split('\n').firstWhere((id) => id.isNotEmpty, orElse: () => "");
         }
       }
     } catch (e) {
@@ -77,12 +77,10 @@ class MyApp extends StatelessWidget {
             );
           } else {
             // Verifica se há um usuário logado ou um guardião
-            if (loginUsuario != null) {
-              return PaginaInicio();
-            } else if (guardiaoId != null) {
+            if (guardiaoId != null) {
               return PaginaInicio();
             } else {
-              return PaginaCadastro(); // Caso nenhum login ou guardião seja encontrado
+              return PaginaCadastro();
             }
           }
         },

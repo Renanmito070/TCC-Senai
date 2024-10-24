@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutternexus/PaginaDuvidas.dart';
+import 'package:flutternexus/PaginaInicio.dart';
 
 class PaginaEsfihas extends StatefulWidget {
   const PaginaEsfihas({Key? key}) : super(key: key);
@@ -295,6 +296,47 @@ class _PaginaEsfihasState extends State<PaginaEsfihas> {
                       });
                     },
                   ),
+                ],
+              ),
+              Padding(padding: EdgeInsets.only(top: 20)),
+              Column(
+                children: [
+                  Padding(padding:
+                  EdgeInsets.only(right: 100, left: 100, bottom: 20),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                PaginaInicio(),
+                          ),
+                        );
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Confirmar ',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                          Icon(
+                            Icons.check,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepOrangeAccent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        textStyle: TextStyle(fontSize: 18),
+                      ),
+                    ),)
                 ],
               ),
             ],

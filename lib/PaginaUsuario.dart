@@ -17,14 +17,73 @@ class PaginaUsuario extends StatefulWidget {
 
 class _PaginaUsuarioState extends State<PaginaUsuario> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  String? nomeUsuario;
   String? usuarioEmail;
   String? _usuarioSenha;
   String? guardiaoEmail;
   int? guardiaoTelefone;
   String? fotoPerfilUrl;
   bool _isObscured = true; // Estado inicial da senha (escondida)
+  bool _editarNomeUsuario = false;
+  bool _editarEmailUsuario = false;
+  bool _editarSenhaUsuario = false;
+  bool _editarEmailGuardiao = false;
+  bool _editarTelefoneGuardiao = false;
+  TextEditingController _nomeUsuarioController = TextEditingController();
+  TextEditingController _emailUsuarioController = TextEditingController();
+  TextEditingController _senhaUsuarioController = TextEditingController();
+  TextEditingController _emailGuardiaoController = TextEditingController();
+  TextEditingController _telefoneGuardiaoController = TextEditingController();
+  FocusNode _focusNode = FocusNode();
 
+  Future<void> _obterDadosUsuario() async {
+    try {
+      DocumentSnapshot doc = await firestore
+          .collection('usuarios')
+          .doc(usuarioId)
+          .get();
+
+      if (doc.exists) {
+        setState(() {
+          _nomeUsuarioController.text = doc['nome']; // Popula o campo de email
+          _emailGuardiaoController.text = doc['email'];
+          _senhaUsuarioController.text = doc['senha'];
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Guardião não encontrado')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar dados: $e')),
+      );
+    }
+  }
+  Future<void> _obterDadosGuardiao() async {
+    try {
+      DocumentSnapshot doc = await firestore
+          .collection('usuarios')
+          .doc(usuarioId)
+          .collection('guardioes')
+          .doc(guardiaoId)
+          .get();
+
+      if (doc.exists) {
+        setState(() {
+          _emailGuardiaoController.text = doc['email']; // Popula o campo de email
+          _telefoneGuardiaoController.text = doc['telefone'].toString();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Guardião não encontrado')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar dados: $e')),
+      );
+    }
+  }
   Future<void> pegarIdDoArquivoUsuario() async {
     try {
       // Obtém o diretório onde o arquivo está salvo
@@ -86,12 +145,11 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
 
           // Verifica se o campo 'nome' existe e o imprime
           if (dadosUsuario.containsKey('nome')) {
-
             // Atualiza o estado com o nome do usuário, se necessário
             setState(() {
-              nomeUsuario = dadosUsuario['nome'];
+              _nomeUsuarioController.text = dadosUsuario['nome'];
             });
-            print('Nome do Usuário: $nomeUsuario');
+            print('Nome do Usuário: ${_nomeUsuarioController.text}');
           } else {
             print('Campo "nome" não encontrado no documento.');
             ScaffoldMessenger.of(context).showSnackBar(
@@ -102,9 +160,9 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
 
             // Atualiza o estado com o nome do usuário, se necessário
             setState(() {
-              usuarioEmail = dadosUsuario['email'];
+              _emailUsuarioController.text = dadosUsuario['email'];
             });
-            print('Email do Usuário: $usuarioEmail');
+            print('Email do Usuário: ${_emailUsuarioController.text}');
           } else {
             print('Campo "Email" não encontrado no documento.');
             ScaffoldMessenger.of(context).showSnackBar(
@@ -115,9 +173,9 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
 
             // Atualiza o estado com o nome do usuário, se necessário
             setState(() {
-              _usuarioSenha = dadosUsuario['senha'];
+              _senhaUsuarioController.text = dadosUsuario['senha'];
             });
-            print('Nome do Usuário: $_usuarioSenha');
+            print('Nome do Usuário: ${_senhaUsuarioController.text}');
           } else {
             print('Campo "senha" não encontrado no documento.');
             ScaffoldMessenger.of(context).showSnackBar(
@@ -163,9 +221,9 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
 
             // Atualiza o estado com o nome do usuário, se necessário
             setState(() {
-              guardiaoEmail = dadosGuardiao['email'];
+              _emailGuardiaoController.text = dadosGuardiao['email'];
             });
-            print('Email do guardiao: $guardiaoEmail');
+            print('Email do guardiao: ${_emailGuardiaoController.text}');
           } else {
             print('Campo "email" não encontrado no documento.');
             ScaffoldMessenger.of(context).showSnackBar(
@@ -176,9 +234,9 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
 
             // Atualiza o estado com o nome do usuário, se necessário
             setState(() {
-              guardiaoTelefone = dadosGuardiao['telefone'];
+              _telefoneGuardiaoController.text = dadosGuardiao['telefone'].toString();
             });
-            print('Telefone do guardiao: $guardiaoTelefone');
+            print('Telefone do guardiao: ${_telefoneGuardiaoController.text}');
           } else {
             print('Campo "Telefone" não encontrado no documento.');
             ScaffoldMessenger.of(context).showSnackBar(
@@ -262,32 +320,57 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
       );
     }
   }
-  Future<void> excluirArquivoLoginUsuario() async {
+  Future<void> atualizarCampo(String usuarioId, String guardiaoId, Map<String, dynamic> novosDados) async {
     try {
-      // Obtém o diretório onde o arquivo está armazenado
-      final directory = await getApplicationDocumentsDirectory();
-      final path = '${directory.path}/loginUsuario.txt';
-      final file = File(path);
+      // Acessa o documento do guardião na subcoleção 'guardioes' do 'usuario'
+      await firestore
+          .collection('usuarios')
+          .doc(usuarioId)
+          .collection('guardioes')
+          .doc(guardiaoId)
+          .update(novosDados); // Atualiza os campos fornecidos
 
-      // Verifica se o arquivo existe e o exclui
-      if (await file.exists()) {
-        await file.delete();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Arquivo excluído com sucesso!')),
-        );
-
-        // Redireciona para a página de cadastro
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const PaginaCadastro()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Arquivo não encontrado')),
-        );
-      }
+      print("Campo(s) atualizado(s) com sucesso!");
+    } catch (e) {
+      print("Erro ao atualizar o campo: $e");
+    }
+  }
+  Future<void> _atualizarGuardiao() async {
+    try {
+      await firestore
+          .collection('usuarios')
+          .doc(usuarioId)
+          .collection("guardioes")
+          .doc(guardiaoId)
+          .update({
+        'email': _emailGuardiaoController.text, // Atualiza o campo de email no Firestore
+        'telefone': int.tryParse(_telefoneGuardiaoController.text) ?? 0, // Atualiza o campo de email no Firestore
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Guardião atualizado com sucesso')),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao excluir arquivo: $e')),
+        SnackBar(content: Text('Erro ao atualizar: $e')),
+      );
+    }
+  }
+  Future<void> _atualizarUsuario() async {
+    try {
+      await firestore
+          .collection('usuarios')
+          .doc(usuarioId)
+          .update({
+        'nome': _nomeUsuarioController.text, // Atualiza o campo de email no Firestore
+        'email': _emailUsuarioController.text, // Atualiza o campo de email no Firestore
+        'senha': _senhaUsuarioController.text,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Guardião atualizado com sucesso')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao atualizar: $e')),
       );
     }
   }
@@ -301,11 +384,24 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
     super.initState();
     obterNomeUsuario();
     obterGuardiao();
+    _obterDadosGuardiao();
+    _obterDadosUsuario();
+  }
+  @override
+  void dispose() {
+    _nomeUsuarioController.dispose();
+    _emailUsuarioController.dispose();
+    _senhaUsuarioController.dispose();
+    _emailGuardiaoController.dispose();
+    _telefoneGuardiaoController.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: SingleChildScrollView(
+        child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
@@ -320,7 +416,7 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
-                    padding: EdgeInsets.only(right: 30, left: 30, bottom: 30, top: 30),
+                  padding: EdgeInsets.only(right: 30, left: 30, bottom: 30, top: 30),
                   child: Container(
                     padding: EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -341,7 +437,7 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                           ),
                         ),
                         Padding(
-                            padding: EdgeInsets.only(right: 100, left: 100),
+                          padding: EdgeInsets.only(right: 100, left: 100),
                           child: CircleAvatar(
                             radius: 90,
                             backgroundImage: fotoPerfilUrl != null
@@ -350,19 +446,40 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                           ),
                         ),
                         Padding(
-                            padding:EdgeInsets.only(bottom: 15, top: 20),
+                          padding: EdgeInsets.only(bottom: 15, top: 20),
                           child: TextField(
-                            controller: TextEditingController(text: "${nomeUsuario}"),
-                            enabled: false, // Desabilita a edição
+                            controller: _nomeUsuarioController,
+                            focusNode: _focusNode, // Adicione o FocusNode aqui
+                            readOnly: !_editarNomeUsuario, // Torna o campo apenas leitura quando não está no modo de edição
                             decoration: InputDecoration(
                               labelText: "Nome",
                               enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white), // Linha branca embaixo
+                                borderSide: BorderSide(color: Colors.white), // Linha branca quando habilitado
                               ),
                               disabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.white), // Linha branca quando desabilitado
                               ),
                               labelStyle: TextStyle(color: Colors.white), // Cor do label
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _editarNomeUsuario ? Icons.check : Icons.edit, // Alterna entre o ícone de editar e de check
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    if (_editarNomeUsuario) {
+                                      print("Atualizando...");
+                                      _atualizarUsuario(); // Chama a função para atualizar os dados no banco
+                                    }
+                                    _editarNomeUsuario = !_editarNomeUsuario; // Alterna o estado de edição
+                                    if (_editarNomeUsuario) {
+                                      _focusNode.requestFocus(); // Garante que o campo tenha foco quando em modo de edição
+                                    } else {
+                                      _focusNode.unfocus(); // Remove o foco quando a edição é desativada
+                                    }
+                                  });
+                                },
+                              ),
                             ),
                             style: TextStyle(color: Colors.white), // Texto branco
                           ),
@@ -370,8 +487,9 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                         Padding(
                           padding:EdgeInsets.only(bottom: 15, top: 20),
                           child: TextField(
-                            controller: TextEditingController(text: "${usuarioEmail}"),
-                            enabled: false, // Desabilita a edição
+                            controller: _emailUsuarioController,
+                            focusNode: _focusNode, // Adicione o FocusNode aqui
+                            readOnly: !_editarEmailUsuario, // Torna o campo apenas leitura quando não está no modo de edição
                             decoration: InputDecoration(
                               labelText: "Email",
                               enabledBorder: UnderlineInputBorder(
@@ -381,6 +499,26 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                                 borderSide: BorderSide(color: Colors.white), // Linha branca quando desabilitado
                               ),
                               labelStyle: TextStyle(color: Colors.white), // Cor do label
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _editarEmailUsuario ? Icons.check : Icons.edit, // Alterna entre o ícone de editar e de check
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    if (_editarEmailUsuario) {
+                                      print("Atualizando...");
+                                      _atualizarUsuario(); // Chama a função para atualizar os dados no banco
+                                    }
+                                    _editarEmailUsuario = !_editarEmailUsuario; // Alterna o estado de edição
+                                    if (_editarEmailUsuario) {
+                                      _focusNode.requestFocus(); // Garante que o campo tenha foco quando em modo de edição
+                                    } else {
+                                      _focusNode.unfocus(); // Remove o foco quando a edição é desativada
+                                    }
+                                  });
+                                },
+                              ),
                             ),
                             style: TextStyle(color: Colors.white), // Texto branco
                           ),
@@ -388,9 +526,9 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                         Padding(
                           padding: EdgeInsets.only(bottom: 15, top: 20),
                           child: TextField(
-                            controller: TextEditingController(text: _usuarioSenha ?? "********"),
-                            obscureText: _isObscured, // Esconde ou mostra o texto
-                            readOnly: true, // O campo pode ser focado, mas o texto não é editável
+                            controller: _senhaUsuarioController,
+                            focusNode: _focusNode, // Adicione o FocusNode aqui
+                            readOnly: !_editarSenhaUsuario, // Torna o campo apenas leitura quando não está no modo de edição
                             decoration: InputDecoration(
                               labelText: "Senha",
                               enabledBorder: UnderlineInputBorder(
@@ -402,10 +540,23 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                               labelStyle: TextStyle(color: Colors.white), // Cor do label
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _isObscured ? Icons.visibility : Icons.visibility_off,
+                                  _editarSenhaUsuario ? Icons.check : Icons.edit, // Alterna entre o ícone de editar e de check
                                   color: Colors.white,
                                 ),
-                                onPressed: _toggleVisibility, // Alterna entre mostrar e esconder a senha
+                                onPressed: () {
+                                  setState(() {
+                                    if (_editarSenhaUsuario) {
+                                      print("Atualizando...");
+                                      _atualizarUsuario(); // Chama a função para atualizar os dados no banco
+                                    }
+                                    _editarSenhaUsuario = !_editarSenhaUsuario; // Alterna o estado de edição
+                                    if (_editarSenhaUsuario) {
+                                      _focusNode.requestFocus(); // Garante que o campo tenha foco quando em modo de edição
+                                    } else {
+                                      _focusNode.unfocus(); // Remove o foco quando a edição é desativada
+                                    }
+                                  });
+                                },
                               ),
                             ),
                             style: TextStyle(color: Colors.white), // Texto branco
@@ -423,8 +574,9 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                           ),
                         ),
                         TextField(
-                          controller: TextEditingController(text: "${guardiaoEmail}"),
-                          enabled: false, // Desabilita a edição
+                          controller: _emailGuardiaoController,
+                          focusNode: _focusNode, // Adicione o FocusNode aqui
+                          readOnly: !_editarEmailGuardiao, // Torna o campo apenas leitura quando não está no modo de edição
                           decoration: InputDecoration(
                             labelText: "Email",
                             enabledBorder: UnderlineInputBorder(
@@ -434,14 +586,35 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                               borderSide: BorderSide(color: Colors.white), // Linha branca quando desabilitado
                             ),
                             labelStyle: TextStyle(color: Colors.white), // Cor do label
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _editarEmailGuardiao ? Icons.check : Icons.edit, // Alterna entre o ícone de editar e de check
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  if (_editarEmailGuardiao) {
+                                    print("Atualizando...");
+                                    _atualizarGuardiao(); // Chama a função para atualizar os dados no banco
+                                  }
+                                  _editarEmailGuardiao = !_editarEmailGuardiao; // Alterna o estado de edição
+                                  if (_editarEmailGuardiao) {
+                                    _focusNode.requestFocus(); // Garante que o campo tenha foco quando em modo de edição
+                                  } else {
+                                    _focusNode.unfocus(); // Remove o foco quando a edição é desativada
+                                  }
+                                });
+                              },
+                            ),
                           ),
                           style: TextStyle(color: Colors.white), // Texto branco
                         ),
                         Padding(
                           padding: EdgeInsets.only(bottom: 15, top: 20),
                           child: TextField(
-                            controller: TextEditingController(text: "${guardiaoTelefone}"),
-                            enabled: false, // Desabilita a edição
+                            controller: _telefoneGuardiaoController,
+                            focusNode: _focusNode, // Adicione o FocusNode aqui
+                            readOnly: !_editarTelefoneGuardiao, // Torna o campo apenas leitura quando não está no modo de edição
                             decoration: InputDecoration(
                               labelText: "Telefone",
                               enabledBorder: UnderlineInputBorder(
@@ -451,6 +624,26 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                                 borderSide: BorderSide(color: Colors.white), // Linha branca quando desabilitado
                               ),
                               labelStyle: TextStyle(color: Colors.white), // Cor do label
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _editarTelefoneGuardiao ? Icons.check : Icons.edit, // Alterna entre o ícone de editar e de check
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    if (_editarTelefoneGuardiao) {
+                                      print("Atualizando...");
+                                      _atualizarGuardiao(); // Chama a função para atualizar os dados no banco
+                                    }
+                                    _editarTelefoneGuardiao = !_editarTelefoneGuardiao; // Alterna o estado de edição
+                                    if (_editarTelefoneGuardiao) {
+                                      _focusNode.requestFocus(); // Garante que o campo tenha foco quando em modo de edição
+                                    } else {
+                                      _focusNode.unfocus(); // Remove o foco quando a edição é desativada
+                                    }
+                                  });
+                                },
+                              ),
                             ),
                             style: TextStyle(color: Colors.white), // Texto branco
                           ),
@@ -464,7 +657,6 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                                 onPressed: () {
                                   excluirArquivoUsuario();
                                   excluirArquivoGuardiao();
-                                  excluirArquivoLoginUsuario();
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
@@ -491,6 +683,7 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
             ),
           ),
         ),
+      ),
       bottomNavigationBar: BottomAppBar(
         height: 60,
         color: Colors.black,

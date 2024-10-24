@@ -17,6 +17,7 @@ class PaginaLogin extends StatefulWidget {
 
 class _PaginaLoginState extends State<PaginaLogin> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  bool _isLoading = false;
   final _formKey = GlobalKey<FormState>(); // GlobalKey para o Form
   final TextEditingController emailUsuario = TextEditingController();
   final TextEditingController _senha = TextEditingController();
@@ -69,7 +70,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
     try {
       // Obtém o diretório onde o arquivo deve ser salvo
       final directory = await getApplicationDocumentsDirectory();
-      final path = '${directory.path}/loginUsuario.txt';
+      final path = '${directory.path}/usuario.txt';
       final file = File(path);
 
       // Escreve o ID no arquivo (adiciona ao invés de sobrescrever)
@@ -80,7 +81,21 @@ class _PaginaLoginState extends State<PaginaLogin> {
       print('Erro ao salvar ID no arquivo: $e');
     }
   }
+  Future<void> salvarIdEmArquivoGuardiao(String guardiaoId) async {
+    try {
+      // Obtém o diretório onde o arquivo deve ser salvo
+      final directory = await getApplicationDocumentsDirectory();
+      final path = '${directory.path}/guardiao.txt';
+      final file = File(path);
 
+      // Escreve o ID no arquivo (adiciona ao invés de sobrescrever)
+      await file.writeAsString('$guardiaoId\n', mode: FileMode.append);
+
+      print('ID do Guardião salvo no arquivo: $path');
+    } catch (e) {
+      print('Erro ao salvar ID no arquivo: $e');
+    }
+  }
   Future<void> obterGuardioes(String id) async {
     try {
       // Obtém todos os documentos da subcoleção 'guardioes' dentro do documento de 'usuarios'
@@ -98,9 +113,12 @@ class _PaginaLoginState extends State<PaginaLogin> {
           print("Existe Documento");
           setState(() {
             guardiaoEmail2 = dadosGuardiao['email']; // Por exemplo, acessa o campo 'email'
+            guardiaoId = doc.id;
           });
           print(guardiaoEmail2);
+          print(guardiaoId);
           print('Email do Guardião: ${dadosGuardiao['email']}');
+          print(guardiaoId);
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -113,7 +131,6 @@ class _PaginaLoginState extends State<PaginaLogin> {
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,39 +227,57 @@ class _PaginaLoginState extends State<PaginaLogin> {
                           SizedBox(
                             width: 260,
                             child: ElevatedButton(
-                              onPressed: () async {
+                              onPressed: _isLoading
+                                  ? null
+                                  : () async {
                                 if (_formKey.currentState?.validate() ?? false) {
-                                  // Verifica as credenciais no banco de dados e obtém o ID do usuário
-                                  final resultado = await verificarCredenciais(
-                                    emailUsuario.text,
-                                    _senha.text,
-                                  );
+                                  setState(() {
+                                    _isLoading = true;
+                                  });
 
-                                  // Verifica se as credenciais são válidas
-                                  if (resultado['isValid']) {
-                                    print('Login em processo');
-                                    String idGuardiao = resultado['userId'];
-                                    salvarIdEmArquivoLoginUsuario(idGuardiao);
-                                    print(idGuardiao);
-                                    await obterGuardioes(idGuardiao);
-                                    print(guardiaoEmail2);
+                                  try {
+                                    // Verifica as credenciais no banco de dados e obtém o ID do usuário
+                                    final resultado = await verificarCredenciais(
+                                      emailUsuario.text,
+                                      _senha.text,
+                                    );
 
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PaginaInicio(guardiaoEmail2),
-                                      ),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('E-mail ou senha incorretos')),
-                                    );
-                                    emailUsuario.clear();
-                                    _senha.clear();
+                                    // Verifica se as credenciais são válidas
+                                    if (resultado['isValid']) {
+                                      print('Login em processo');
+                                      String idUsuario = resultado['userId'];
+                                      salvarIdEmArquivoLoginUsuario(idUsuario);
+                                      print(idUsuario);
+                                      await obterGuardioes(idUsuario);
+                                      print(guardiaoEmail2);
+
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PaginaInicio(guardiaoEmail2),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('E-mail ou senha incorretos')),
+                                      );
+                                      emailUsuario.clear();
+                                      _senha.clear();
+                                    }
+                                  } catch (error) {
+                                    print('Erro: $error');
+                                  } finally {
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
                                   }
                                 }
                               },
-                              child: Row(
+                              child: _isLoading
+                                  ? CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              )
+                                  : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text('Login', style: TextStyle(color: Colors.white)),
@@ -257,7 +292,8 @@ class _PaginaLoginState extends State<PaginaLogin> {
                                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                                 textStyle: TextStyle(fontSize: 18),
                               ),
-                            ),
+                            )
+
                           ),
                         ],
                       ),

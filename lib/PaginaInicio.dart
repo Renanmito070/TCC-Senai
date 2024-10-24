@@ -213,7 +213,7 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
         'template_params': {
           'to_email': recipient,
           'from_name': 'App User',
-          'message': _address,
+          'message': "$nomeUsuario esta em perigo nesta localidade: $_address",
         },
       }),
     );
@@ -252,7 +252,7 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
       }
       if (_address.isNotEmpty) {
         final String url = 'https://api.telegram.org/bot$botToken/sendMessage';
-        final String message = 'Peço que você entre em contato com [Nome da pessoa em perigo] o mais rápido possível para verificar se ela está bem. Por favor, se dirija ao local onde ela se encontra ou entre em contato com as autoridades locais para garantir que ela receba a ajuda necessária. $_address';
+        final String message = 'Peço que você entre em contato com ${nomeUsuario} o mais rápido possível para verificar se ela está bem. Por favor, se dirija ao local onde ela se encontra ou entre em contato com as autoridades locais para garantir que ela receba a ajuda necessária. $_address';
 
         if(guardiaoEmail == null){
           await _sendEmail(widget.guardiaoEmail2!);
@@ -291,7 +291,8 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: SingleChildScrollView(
+        child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
@@ -385,7 +386,7 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
                 ],
               ),
               Padding(
-                  padding: EdgeInsets.only(top: 40),
+                padding: EdgeInsets.only(top: 40),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -433,6 +434,7 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
             ],
           ),
         ),
+      ),
       bottomNavigationBar: BottomAppBar(
         height: 60,
         color: Colors.black,

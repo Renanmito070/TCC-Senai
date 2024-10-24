@@ -19,14 +19,25 @@ class PaginaCadastro extends StatefulWidget {
 class _PaginaCadastroState extends State<PaginaCadastro> {
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  bool _isLoading = false;
   Map<String, dynamic>? usuario; // Para armazenar os dados do usuário específico
   Map<String, dynamic>? guardiao; // Para armazenar os dados do usuário específico
   final _formKey = GlobalKey<FormState>(); // GlobalKey para o Form
   final TextEditingController emailUsuario = TextEditingController();
   final TextEditingController _senha = TextEditingController();
+  final TextEditingController confirmarSenha = TextEditingController();
   final TextEditingController emailGuardiao = TextEditingController();
   final TextEditingController telefone = TextEditingController();
   final TextEditingController nomeUsuario = TextEditingController();
+
+  Future<bool> verificarSenha() async {
+    if (_senha.text == confirmarSenha.text) {
+      return Future.value(true);
+    } else {
+      return Future.value(false);
+    }
+  }
+
 
 
   Future<void> adicionarUsuarioEGuardiao() async {
@@ -217,6 +228,14 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
                                   fillColor: Colors.black.withOpacity(0.3), // Fundo do campo
                                 ),
                                 style: TextStyle(color: Colors.white), // Cor do texto
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    print('Erro: Nome está vazia');
+                                    return 'Por favor, digite uma nome';
+                                  } else {
+                                    return null;
+                                  }
+                                },
                               ),
                             ),
                             SizedBox(height: 20),
@@ -253,7 +272,7 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
                             SizedBox(height: 20),
                             SizedBox(
                               width: 350, // Ajuste a largura conforme necessário
-                              child: TextField(
+                              child: TextFormField(
                                 controller: _senha,
                                 obscureText: true,
                                 decoration: InputDecoration(
@@ -269,6 +288,43 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
                                   fillColor: Colors.black.withOpacity(0.3), // Fundo do campo
                                 ),
                                 style: TextStyle(color: Colors.white), // Cor do texto
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    print('Erro: Senha está vazia');
+                                    return 'Por favor, digite uma senha';
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            SizedBox(
+                              width: 350, // Ajuste a largura conforme necessário
+                              child: TextFormField(
+                                controller: confirmarSenha,
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                  labelText: 'Confirmar senha',
+                                  labelStyle: TextStyle(
+                                      color: Colors.white
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  prefixIcon: Icon(Icons.password, color: Colors.white),
+                                  filled: true,
+                                  fillColor: Colors.black.withOpacity(0.3), // Fundo do campo
+                                ),
+                                style: TextStyle(color: Colors.white), // Cor do texto
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    print('Erro: Senha está vazia');
+                                    return 'Por favor, digite uma senha';
+                                  } else {
+                                    return null;
+                                  }
+                                },
                               ),
                             ),
                             Padding(padding: EdgeInsets.only(bottom: 15, top: 20)),
@@ -317,7 +373,7 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
                             SizedBox(height: 20),
                             SizedBox(
                               width: 350, // Ajuste a largura conforme necessário
-                              child: TextField(
+                              child: TextFormField(
                                 keyboardType: TextInputType.phone,
                                 controller: telefone,
                                 decoration: InputDecoration(
@@ -333,22 +389,58 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
                                   fillColor: Colors.black.withOpacity(0.3), // Fundo do campo
                                 ),
                                 style: TextStyle(color: Colors.white), // Cor do texto
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    print('Erro: Telefone está vazia');
+                                    return 'Por favor, digite uma telefone';
+                                  } else {
+                                    return null;
+                                  }
+                                },
                               ),
                             ),
                             SizedBox(height: 45),
                             SizedBox(
                               width: 260, // Ajuste a largura conforme necessário
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: _isLoading
+                                    ? null
+                                    : () async {
                                   if (_formKey.currentState?.validate() ?? false) {
-                                    print('Validação bem-sucedida');
-                                    adicionarUsuarioEGuardiao();
-                                    _sendEmail(emailGuardiao.text);
+                                    bool senhaValida = await verificarSenha(); // Aguardar o resultado de verificarSenha()
+
+                                    if (senhaValida) {
+                                      setState(() {
+                                        _isLoading = true;
+                                      });
+
+                                      try {
+                                        await adicionarUsuarioEGuardiao();
+                                        await _sendEmail(emailGuardiao.text);
+                                        print('Validação bem-sucedida');
+                                      } catch (error) {
+                                        print('Erro: $error');
+                                      } finally {
+                                        setState(() {
+                                          _isLoading = false;
+                                        });
+                                      }
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('As senhas não são as mesmas'),
+                                        ),
+                                      );
+                                    }
                                   } else {
                                     print('Falha na validação');
                                   }
                                 },
-                                child: Row(
+                                child: _isLoading
+                                    ? CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                )
+                                    : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
