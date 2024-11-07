@@ -37,9 +37,6 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
       return Future.value(false);
     }
   }
-
-
-
   Future<void> adicionarUsuarioEGuardiao() async {
     try {
       // Adicionar o usuário primeiro
@@ -100,7 +97,6 @@ class _PaginaCadastroState extends State<PaginaCadastro> {
       }
     }
   }
-
   Future<void> salvarIdEmArquivoUsuario(String usuarioId) async {
     try {
       // Obtém o diretório onde o arquivo deve ser salvo

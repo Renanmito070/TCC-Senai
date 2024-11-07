@@ -6,6 +6,7 @@ import 'package:flutternexus/PaginaInicio.dart';
 import 'package:flutternexus/PaginaMaps.dart';
 import 'package:flutternexus/main.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PaginaUsuario extends StatefulWidget {
@@ -18,7 +19,6 @@ class PaginaUsuario extends StatefulWidget {
 class _PaginaUsuarioState extends State<PaginaUsuario> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   String? usuarioEmail;
-  String? _usuarioSenha;
   String? guardiaoEmail;
   int? guardiaoTelefone;
   String? fotoPerfilUrl;
@@ -34,7 +34,46 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
   TextEditingController _emailGuardiaoController = TextEditingController();
   TextEditingController _telefoneGuardiaoController = TextEditingController();
   FocusNode _focusNode = FocusNode();
+  final ImagePicker _picker = ImagePicker();
 
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        fotoPerfilUrl = pickedFile.path;
+      });
+    }
+  }
+  void _showPickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text('Escolher da Galeria'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Usar Câmera'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
   Future<void> _obterDadosUsuario() async {
     try {
       DocumentSnapshot doc = await firestore
@@ -49,14 +88,10 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
           _senhaUsuarioController.text = doc['senha'];
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Guardião não encontrado')),
-        );
+        print("Guardião não encontrado");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar dados: $e')),
-      );
+      print("Erro ao carregar dados: $e");
     }
   }
   Future<void> _obterDadosGuardiao() async {
@@ -74,14 +109,10 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
           _telefoneGuardiaoController.text = doc['telefone'].toString();
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Guardião não encontrado')),
-        );
+        print("Guardião não encontrado");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar dados: $e')),
-      );
+      print("Erro ao carregar dados: $e");
     }
   }
   Future<void> pegarIdDoArquivoUsuario() async {
@@ -152,9 +183,6 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
             print('Nome do Usuário: ${_nomeUsuarioController.text}');
           } else {
             print('Campo "nome" não encontrado no documento.');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Campo "nome" não encontrado.')),
-            );
           }
           if (dadosUsuario.containsKey('email')) {
 
@@ -165,9 +193,6 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
             print('Email do Usuário: ${_emailUsuarioController.text}');
           } else {
             print('Campo "Email" não encontrado no documento.');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Campo "Email" não encontrado.')),
-            );
           }
           if (dadosUsuario.containsKey('senha')) {
 
@@ -178,27 +203,15 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
             print('Nome do Usuário: ${_senhaUsuarioController.text}');
           } else {
             print('Campo "senha" não encontrado no documento.');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Campo "senha" não encontrado.')),
-            );
           }
         } else {
           print('Documento do usuário não encontrado.');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Usuário não encontrado no Firestore.')),
-          );
         }
       } else {
         print('ID do usuário é nulo.');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao carregar o ID do usuário.')),
-        );
       }
     } catch (e) {
       print('Erro ao obter nome do usuário: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao obter nome do usuário: $e')),
-      );
     }
   }
   Future<void> obterGuardiao() async {
@@ -226,9 +239,6 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
             print('Email do guardiao: ${_emailGuardiaoController.text}');
           } else {
             print('Campo "email" não encontrado no documento.');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Campo "email" não encontrado.')),
-            );
           }
           if (dadosGuardiao.containsKey('telefone')) {
 
@@ -239,27 +249,15 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
             print('Telefone do guardiao: ${_telefoneGuardiaoController.text}');
           } else {
             print('Campo "Telefone" não encontrado no documento.');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Campo "Telefone" não encontrado.')),
-            );
           }
         } else {
           print('Documento do usuário não encontrado.');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Usuário não encontrado no Firestore.')),
-          );
         }
       } else {
         print('ID do usuário é nulo.');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao carregar o ID do usuário.')),
-        );
       }
     } catch (e) {
       print('Erro ao obter nome do usuário: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao obter nome do usuário: $e')),
-      );
     }
   }
   Future<void> excluirArquivoUsuario() async {
@@ -272,23 +270,17 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
       // Verifica se o arquivo existe e o exclui
       if (await file.exists()) {
         await file.delete();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Arquivo excluído com sucesso!')),
-        );
+        print("Arquivo excluído com sucesso!");
 
         // Redireciona para a página de cadastro
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const PaginaCadastro()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Arquivo não encontrado')),
-        );
+        print("Arquivo não encontrado");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao excluir arquivo: $e')),
-      );
+      print("Erro ao excluir arquivo: $e");
     }
   }
   Future<void> excluirArquivoGuardiao() async {
@@ -301,23 +293,17 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
       // Verifica se o arquivo existe e o exclui
       if (await file.exists()) {
         await file.delete();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Arquivo excluído com sucesso!')),
-        );
+        print("Arquivo excluído com sucesso!");
 
         // Redireciona para a página de cadastro
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const PaginaCadastro()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Arquivo não encontrado')),
-        );
+        print("Arquivo não encontrado");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao excluir arquivo: $e')),
-      );
+      print("Erro ao excluir arquivo: $e");
     }
   }
   Future<void> atualizarCampo(String usuarioId, String guardiaoId, Map<String, dynamic> novosDados) async {
@@ -346,13 +332,9 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
         'email': _emailGuardiaoController.text, // Atualiza o campo de email no Firestore
         'telefone': int.tryParse(_telefoneGuardiaoController.text) ?? 0, // Atualiza o campo de email no Firestore
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Guardião atualizado com sucesso')),
-      );
+      print("Guardião atualizado com sucesso");
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao atualizar: $e')),
-      );
+      print("Erro ao atualizar: $e");
     }
   }
   Future<void> _atualizarUsuario() async {
@@ -365,13 +347,9 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
         'email': _emailUsuarioController.text, // Atualiza o campo de email no Firestore
         'senha': _senhaUsuarioController.text,
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Guardião atualizado com sucesso')),
-      );
+      print("Guardião atualizado com sucesso");
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao atualizar: $e')),
-      );
+      print("Erro ao atualizar: $e");
     }
   }
   void _toggleVisibility() {
@@ -438,12 +416,30 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                         ),
                         Padding(
                           padding: EdgeInsets.only(right: 100, left: 100),
-                          child: CircleAvatar(
-                            radius: 90,
-                            backgroundImage: fotoPerfilUrl != null
-                                ? NetworkImage(fotoPerfilUrl!)
-                                : AssetImage("images/default_profile.png") as ImageProvider,
-                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircleAvatar(
+                                radius: 90,
+                                backgroundImage: fotoPerfilUrl != null
+                                    ? FileImage(File(fotoPerfilUrl!))  // Usar FileImage para imagens locais
+                                    : AssetImage("images/default_profile.png") as ImageProvider,
+                              ),
+                              SizedBox(height: 10), // Espaço entre o avatar e o botão
+                              GestureDetector(
+                                onTap: _showPickerOptions,
+                                child: Container(
+                                  padding: EdgeInsets.all(12),
+                                  child: Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.white, // Escolha a cor do ícone
+                                    size: 30,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+
                         ),
                         Padding(
                           padding: EdgeInsets.only(bottom: 15, top: 20),
@@ -660,16 +656,25 @@ class _PaginaUsuarioState extends State<PaginaUsuario> {
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
-                                  side: BorderSide(color: Colors.red, width: 2), // Borda vermelha
+                                  side: BorderSide(color: Colors.amber, width: 2), // Borda vermelha
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.zero, // Borda quadrada
                                   ),
                                 ),
-                                child: Text(
-                                  "Excluir",
-                                  style: TextStyle(
-                                    color: Colors.red, // Texto vermelho
-                                  ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Logout ',
+                                      style: TextStyle(
+                                        color: Colors.amber,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.logout,
+                                      color: Colors.amber,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),

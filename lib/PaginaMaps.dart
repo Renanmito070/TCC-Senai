@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutternexus/PaginaInicio.dart';
+import 'package:flutternexus/PaginaUsuario.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
@@ -80,7 +81,12 @@ class _PaginaMapsState extends State<PaginaMaps> {
                   IconButton(
                     icon: Icon(Icons.person, color: Colors.white),
                     onPressed: () {
-                      // Ação para o botão de perfil
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaginaUsuario(),
+                        ),
+                      );
                     },
                   ),
                 ],

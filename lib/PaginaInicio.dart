@@ -1,10 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutternexus/PaginaBebidas.dart';
-import 'package:flutternexus/PaginaCadastro.dart';
-import 'package:flutternexus/PaginaDuvidas.dart';
 import 'package:flutternexus/PaginaEsfihas.dart';
-import 'package:flutternexus/PaginaMedidaProtetiva.dart';
 import 'package:flutternexus/PaginaGuardiao.dart';
 import 'package:flutternexus/PaginaMaps.dart';
 import 'package:flutternexus/PaginaUsuario.dart';
@@ -85,14 +83,10 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
         });
         await _handleSubmit();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Nenhum guardião encontrado')),
-        );
+        print("Nenhum guardião encontrado");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao obter dados: $e')),
-      );
+      print("Erro ao obter dados: $e");
     }
   }
   Future<void> obterNomeUsuario() async {
@@ -120,27 +114,15 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
             print('Nome do Usuário: $nomeUsuario');
           } else {
             print('Campo "nome" não encontrado no documento.');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Campo "nome" não encontrado.')),
-            );
           }
         } else {
           print('Documento do usuário não encontrado.');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Usuário não encontrado no Firestore.')),
-          );
         }
       } else {
         print('ID do usuário é nulo.');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao carregar o ID do usuário.')),
-        );
       }
     } catch (e) {
       print('Erro ao obter nome do usuário: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao obter nome do usuário: $e')),
-      );
     }
   }
   @override
@@ -219,17 +201,7 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
     );
 
     if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Pedido a caminho!!!',
-            style: TextStyle(
-              fontSize: 20,
-            ),
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
+      showNotification();
       print("Email enviado para: $recipient");
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -271,22 +243,29 @@ class _PaginaInicioState extends State<PaginaInicio> with SingleTickerProviderSt
         }
       } else {
         print('Endereço não encontrado.');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro: Endereço não encontrado.'),
-          ),
-        );
       }
     } catch (e) {
       print('Erro ao obter a posição: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro ao obter localização: $e'),
-        ),
-      );
     }
   }
+  Future<void> showNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'Alerta00', // ID único do canal
+      'CanalAlerta', // Nome do canal
+      importance: Importance.high,
+      priority: Priority.high,
+      showWhen: false,
+    );
 
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0, // ID da notificação
+      'Pizzaria Amparo',
+      'Seu pedido esta a caminho',
+      platformChannelSpecifics,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

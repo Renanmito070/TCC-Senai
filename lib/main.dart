@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutternexus/PaginaCadastro.dart';
 import 'package:flutternexus/PaginaGuardiao.dart';
 import 'package:flutternexus/PaginaInicio.dart';
@@ -9,10 +10,15 @@ import 'dart:io';
 String? guardiaoId; // Para armazenar o ID do Guardião adicionado
 String? usuarioId; // Para armazenar o ID do Usuario adicionado
 String? loginUsuario;
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  WidgetsFlutterBinding.ensureInitialized();
+  final initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+  final initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   runApp(MyApp());
 }
 
